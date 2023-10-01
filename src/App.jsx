@@ -1,61 +1,101 @@
-import React from 'react';
+// import fetch from 'node-fetch';
 import axios from 'axios';
+import  { useState } from 'react';
 
 const App = () => {
+  const [usuario, setUsuario] = useState('');
+  const [email, setEmail] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [errors, setErrors] = useState({ usuario: '', email: '', descripcion: '' });
+  const auth = "c2lzdGVtYXM2QGNvbXBjLmNvbS5hcjpBVEFUVDN4RmZHRjA2UTRzV2pBT2l2Q2swVlE2clVJQ1p6ZjNZcWRJaDRGZHNqcm9xd2Iwd2o1c0VYMjZ2ek5kNlU2WHFJNThwbTN4UDF0Y1huZ2o0WWZKNXQ0TU1sVkhoY1BFZW5FRmloSXVWazRZSWpDZDVqWWhXU3V6MV9pRzJoOVh1eGZ5QVhxQUsybUhFUG8wX1Q2dF8tSjF3OHJKcTFSWVNXX003SC10R0ZIbndubGljRVE9OEYzRUFDREE="
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      // Obtén los valores del formulario
-      // const usuario = e.target.elements['first-name'].value;
-      // const email = e.target.elements['email'].value;
-      // const descripcion = e.target.elements['textarea'].value;
+    // Validación de nombre no vacío
+    if (!usuario.trim()) {
+      setErrors({ ...errors, usuario: 'El nombre no puede estar vacío' });
+      return;
+    }
+
+    // Validación de correo electrónico
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!emailPattern.test(email)) {
+      setErrors({ ...errors, email: 'Ingresa un correo electrónico válido' });
+      return;
+    }
+
+    // Validación de descripción no vacía
+    if (!descripcion.trim()) {
+      setErrors({ ...errors, descripcion: 'La descripción no puede estar vacía' });
+      return;
+    }
+
+      // Restablece los mensajes de error en caso de éxito
+      setErrors({ usuario: '', email: '', descripcion: '' });
 
       // Construye el objeto de datos para el cuerpo de la solicitud
-      const bodyData = {
+      const data = {
         fields: {
           project: {
-            key: "ATATT3xFfGF0CQswdhmTGMWIqX_GmTW0IoHCvdR2Q36M-OoJf3m-aFZ6Q2jRa8R5TYLVGtusWS3radKRrznbnTP-INxFdsWR210iMUUmaU9kAxKya9_G1EkhxcuPAjyOtQNdIlb5k4_gf38UoBOg0ehoVKfbZyO5WOKZNDZOQGwu9-RWmb9JfMM=F7FC3EEE",
             id: "10010"
           },
-          summary: "Incidencia desde Softland",
-          issuetype: {
-            id: "10039"
+          summary: "DESCRIPTION",
+          description: {
+            type: "doc",
+            version: 1,
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    text: "Order entry fails when selecting supplier.",
+                    type: "text"
+                  }
+                ]
+              }
+            ]
           },
-          description: `algo`
-          //Usuario: ${usuario}\nEmail: ${email}\nDescripción: ${descripcion}
+          issuetype: {
+            id: "10045"
+          }
         }
       };
+      const bodyData = JSON.stringify(data);
 
       // Realiza la solicitud POST a la API de Atlassian
-      const response = await axios.post('https://gpenna.atlassian.net/rest/api/3/issue', bodyData, {
+      axios.post('https://gpenna.atlassian.net/rest/api/3/issue', bodyData, {
         headers: {
-          Authorization: "ATATT3xFfGF0CQswdhmTGMWIqX_GmTW0IoHCvdR2Q36M-OoJf3m-aFZ6Q2jRa8R5TYLVGtusWS3radKRrznbnTP-INxFdsWR210iMUUmaU9kAxKya9_G1EkhxcuPAjyOtQNdIlb5k4_gf38UoBOg0ehoVKfbZyO5WOKZNDZOQGwu9-RWmb9JfMM=F7FC3EEE",  // Reemplaza 'TU_TOKEN' con tu token de autorización de Atlassian
+          Authorization: `Basic ${auth}`,
           'Content-Type': 'application/json',
         },
-      });
+      })
+      .then(response => {
+        console.log(`Response: ${response.status} ${response.statusText}`);
+        return response;
+      })
+      .then(text => console.log(text))
+      .catch(err => console.error(err));
 
-      console.log('Respuesta de la API de Atlassian:', response.data);
-      alert('¡Se envió el formulario correctamente!');
-    } catch (error) {
-      console.error('Error al hacer la solicitud:', error);
-      alert('Ocurrió un error al enviar el formulario.');
-    }
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center">
-        <div className='flex flex-col w-full'>
-          <img src='https://softland.com.ar/wp-content/uploads/2020/09/logo-blanco-1.png' className='flex items-start w-36'></img>
-          <h1 className="text-3xl font-bold flex">Notificar a Softland</h1>
-        </div>
-       <form onSubmit={handleSubmit}> {/* onSubmit={handleSubmit} action="/api/submit-form" method="post" */}
+    <div className="flex min-h-screen flex-col items-center bg-softlandbg ">
+      <div className='flex flex-col w-full'>
+        <img src='https://softland.com.ar/wp-content/uploads/2020/09/logo-blanco-1.png' className='flex items-start w-36 p-1'></img>
+        <h1 className="text-3xl font-bold w-full flex items-center justify-center font-titilliumWeb text-slate-200">Notificar incidencia</h1>
+      </div>
+      <form onSubmit={handleSubmit}>
+        {/* <div className="text-red-500">
+          {errors.usuario && <div>{errors.usuario}</div>}
+          {errors.email && <div>{errors.email}</div>}
+          {errors.descripcion && <div>{errors.descripcion}</div>}
+        </div> */}
         <div className="space-y-12">
           <div className="pb-12">
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-              <div className="sm:col-span-3">
-                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+            <div className="mt-8 grid grid-cols-1 gap-x-2 gap-y-4">
+              <div className="">
+                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-slate-100">
                   Usuario
                 </label>
                 <div className="mt-2">
@@ -64,65 +104,72 @@ const App = () => {
                     name="first-name"
                     id="first-name"
                     autoComplete="given-name"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="px-3 block w-full rounded-md border-0 py-1.5 text-slate-700 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={usuario}
+                    onChange={(e) => setUsuario(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="sm:col-span-4">
-                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+              <div className="">
+                <label htmlFor="email" className="block text-sm font-medium leading-6 text-slate-100">
                   Email
                 </label>
-                <div className="mt-2">
+                <div className="mt-1">
                   <input
                     id="email"
                     name="email"
-                    type="email"
+                    // type="email"
                     autoComplete="email"
-                    className="pl-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="px-3 block w-full rounded-md border-0 py-1.5 text-slate-700 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
-            </div>
-            <div className='sm:col-span-4 '>
-            
-              <textarea name="textarea" rows="10" cols="50" className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">Informar si se encontro alguna inconsistencia o si hay algun error</textarea>
-            </div>
-            <div className="col-span-full">
-              <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                Subir archivo
-              </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div className="text-center">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-300"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                  </svg>
-                  <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload a file</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+              <div className='mt-1'>
+                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-slate-100">
+                  Incidencia
+                </label>
+                <div className="mt-1">
+                  <textarea
+                    name="textarea"
+                    rows="3"
+                    cols="50"
+                    placeholder='Informar si se encontro alguna inconsistencia o si hay algun error'
+                    className="px-3 mt-2 block w-full rounded-md border-0  py-1.5 text-slate-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="">
+                <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-slate-100">
+                  Subir archivo
+                </label>
+                <div className="mt-1 flex rounded-lg border border-dashed border-gray-300/25 p-1">
+                  <div className="text-center">
+                    <div className="flex text-sm leading-6 text-gray-400">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative px-2 cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500 hover:bg-sky-200"
+                      >
+                        <span>Subir archivo</span>
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                      </label>
+                    </div>
                   </div>
-                  <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
                 </div>
               </div>
             </div>
+            <div className="mt-9 flex items-center justify-center">
+              <button
+                type="submit"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Informar incidencia
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="mt-6 flex items-center justify-center">
-          <button
-            type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Informar incidencia
-          </button>
         </div>
       </form>
     </div>

@@ -5,7 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        softlandbg: "#222933"
+      },
+      titilliumWeb: "'Titillium Web', 'sans-serif'"
+    },
   },
   plugins: [],
 }
